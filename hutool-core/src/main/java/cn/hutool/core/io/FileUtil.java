@@ -589,13 +589,12 @@ public class FileUtil {
 	 * 当给定对象为文件时，直接调用 {@link File#length()}<br>
 	 * 当给定对象为目录时，遍历目录下的所有文件和目录，递归计算其大小，求和返回
 	 *
-	 * @param file 目录或文件
+	 * @param file 目录或文件,null或者文件不存在返回0
 	 * @return 总大小，bytes长度
 	 */
 	public static long size(File file) {
-		Assert.notNull(file, "file argument is null !");
-		if (false == file.exists()) {
-			throw new IllegalArgumentException(StrUtil.format("File [{}] not exist !", file.getAbsolutePath()));
+		if (null == file || false == file.exists()) {
+			return 0;
 		}
 
 		if (file.isDirectory()) {
@@ -1176,7 +1175,10 @@ public class FileUtil {
 	 */
 	public static File rename(File file, String newName, boolean isRetainExt, boolean isOverride) {
 		if (isRetainExt) {
-			newName = newName.concat(".").concat(FileUtil.extName(file));
+			final String extName = FileUtil.extName(file);
+			if(StrUtil.isNotBlank(extName)){
+				newName = newName.concat(".").concat(extName);
+			}
 		}
 		final Path path = file.toPath();
 		final CopyOption[] options = isOverride ? new CopyOption[]{StandardCopyOption.REPLACE_EXISTING} : new CopyOption[]{};
@@ -3576,6 +3578,6 @@ public class FileUtil {
 	 * @param charset 编码
 	 */
 	public static void tail(File file, Charset charset) {
-		FileUtil.tail(file, charset, Tailer.CONSOLE_HANDLER);
+		tail(file, charset, Tailer.CONSOLE_HANDLER);
 	}
 }
